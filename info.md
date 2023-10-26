@@ -1,44 +1,38 @@
 # Lovelace animated weather card
 
-Originally created for the [old UI](https://community.home-assistant.io/t/custom-ui-weather-state-card-with-a-question/23008) converted by @arsaboo and @ciotlosm to [Lovelace](https://community.home-assistant.io/t/custom-ui-weather-state-card-with-a-question/23008/291) and now converted to Lit to make it even better.
+Improved version of [weather card](https://github.com/bramkragten/weather-card) to support new hourly forecasts in Home Assistant 2023 and forward.
 
 This card uses the awesome [animated SVG weather icons by amCharts](https://www.amcharts.com/free-animated-svg-weather-icons/).
 
 ![Weather Card](https://github.com/bramkragten/custom-ui/blob/master/weather-card/weather-card.gif?raw=true)
 
-Thanks for all picking this card up.
-
 ## Installation:
 
-### If you are using Firefox:
 
-Firefox < 66 does not support all the needed functions yet for the editor.
-You change this by enabling `javascript.options.dynamicImport` in `about:config`.
-
-Add the following to resources in your lovelace config:
+Add the following to resources in your lovelace config (typically `/config/lovelace.yaml`):
 
 ```yaml
 resources:
-  - url: /hacsfiles/weather-card/weather-card.js
+  - url: /hacsfiles/v-weather-card/v-weather-card.js
     type: module
 ```
 
 ## Configuration:
 
-And add a card with type `custom:weather-card`:
+And add a card with type `custom:v-weather-card`:
 
 ```yaml
-- type: custom:weather-card
-  entity: weather.yourweatherentity
-  name: Optional name
+type: custom:v:weather-card
+entity: weather.yourweatherentity
+name: Optional name
 ```
 
 If you want to use your local icons add the location to the icons:
 
 ```yaml
-- type: custom:weather-card
-  entity: weather.yourweatherentity
-  icons: "/community_plugin/weather-card/icons/"
+type: custom:v-weather-card
+entity: weather.yourweatherentity
+icons: "/local/custom-components/v-weather-card/icons/"
 ```
 
 You can choose wich elements of the weather card you want to show:
@@ -50,7 +44,7 @@ The 3 different rows, being:
 - The 5 day forecast
 
 ```yaml
-type: custom:weather-card
+type: custom:v-weather-card
 entity: weather.yourweatherentity
 current: true
 details: false
