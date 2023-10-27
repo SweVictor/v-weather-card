@@ -3,7 +3,7 @@ import { styles } from "./card.styles";
 import { customElement, state } from "lit/decorators";
 
 import { HassEntity } from "home-assistant-js-websocket";
-import { ActionConfig, ActionHandlerEvent, HomeAssistant, LovelaceCardConfig, handleAction, hasAction, hasConfigOrEntityChanged } from "custom-card-helpers";
+import { ActionConfig, ActionHandlerEvent, formatTime, HomeAssistant, LovelaceCardConfig, handleAction, hasAction, hasConfigOrEntityChanged } from "custom-card-helpers";
 
 interface Config extends LovelaceCardConfig {
   header?: string;
@@ -111,8 +111,9 @@ export class VWeatherCard extends LitElement {
 
   set hass(hass: HomeAssistant) {
     this._hass = hass;
-    console.log("Setting hass", hass);
+    console.debug("Setting hass", hass);
     this.state = hass.states[this.config.entity];
+    console.debug("State", this.state);
     this.entity = this.config.entity;
     this.header = this.config.header === "" ? nothing : this.config.header;
 
@@ -125,9 +126,22 @@ export class VWeatherCard extends LitElement {
     // console.log("Header", this.header);
     // console.log("Name", this.name);
     // console.log("State", this.state);
-    console.log("Status", this.status);
+    console.debug("Status", this.status);
+
+  //   this._hass.callApi("POST", "services/weather/get_forecast", {
+  //     target: {
+  //       entity_id: this.entity,
+  //     },
+  //     data: {
+  //       type: "hourly"
+  //     },
+  //     response_variable: "weather_forecast"
+  //   }).then(r => {
+  //     console.log("Response: ", r);
+  //   })
   }
 
+  
   // declarative part
   static styles = styles;
 
@@ -144,12 +158,13 @@ export class VWeatherCard extends LitElement {
 
   // https://lit.dev/docs/components/rendering/
   render(): TemplateResult {
-    let content: TemplateResult;
-
 
     if (!this.config || !this._hass) {
       return html``;
     }
+
+
+    if (this.config.hou)
 
     this.numberElements = 0;
 
@@ -176,9 +191,9 @@ export class VWeatherCard extends LitElement {
     return html`
       <ha-card header="${this.header}" @click="${this._handleClick}">
         ${this.config.current !== false ? this.renderCurrent(stateObj) : ""}
-        ${this.config.details !== false ? this.renderDetails(stateObj, lang) : ""}
+        ${this.config.details !== false ? this.renderDetails(stateObj, this._hass.locale) : ""}
         ${this.config.forecast !== false
-        ? this.renderForecast(stateObj.attributes.forecast, lang)
+        ? this.renderForecast(stateObj, this._hass.locale)
         : ""}
       </ha-card>
       `;
@@ -227,29 +242,25 @@ export class VWeatherCard extends LitElement {
         ? html` <span class="title"> ${this.config.name} </span> `
         : ""}
         <span class="temp"
-          >${this.getUnit("temperature") == "°F"
+          >${stateObj.attributes.temperature_unit === "°F"
         ? Math.round(stateObj.attributes.temperature)
         : stateObj.attributes.temperature}</span
         >
-        <span class="tempc"> ${this.getUnit("temperature")}</span>
+        <span class="tempc">
+          ${stateObj.attributes.temperature_unit}
+        </span>
       </div>
     `;
   }
 
-  renderDetails(stateObj, lang) {
+  renderDetails(stateObj, userLocale) {
     const sun = this._hass.states["sun.sun"];
     let next_rising;
     let next_setting;
 
     if (sun) {
-      next_rising = new Date(sun.attributes.next_rising).toLocaleTimeString(lang, {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      next_setting = new Date(sun.attributes.next_setting).toLocaleTimeString(lang, {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      next_rising = formatTime(new Date(sun.attributes.next_rising), userLocale);
+      next_setting = formatTime(new Date(sun.attributes.next_setting), userLocale);
     }
 
     this.numberElements++;
@@ -265,22 +276,24 @@ export class VWeatherCard extends LitElement {
       Math.floor(((stateObj.attributes.wind_bearing as number) + 11.25) / 22.5)
       ]}
           ${stateObj.attributes.wind_speed}<span class="unit">
-            ${this.getUnit("length")}/h
+            ${stateObj.attributes.wind_speed_unit}
           </span>
         </li>
         <li>
           <ha-icon icon="mdi:gauge"></ha-icon>
           ${stateObj.attributes.pressure}
           <span class="unit">
-            ${this.getUnit("air_pressure")}
+            ${stateObj.attributes.pressure_unit}
           </span>
         </li>
-        <li>
+        ${stateObj.attributes.visibility && html`
+        <li >
           <ha-icon icon="mdi:weather-fog"></ha-icon> ${stateObj.attributes
-        .visibility}<span class="unit">
-            ${this.getUnit("length")}
+          .visibility}<span class="unit">
+            ${stateObj.attributes.visibility_unit}
           </span>
         </li>
+        `}
         ${next_rising
         ? html`
               <li>
@@ -301,7 +314,16 @@ export class VWeatherCard extends LitElement {
     `;
   }
 
-  renderForecast(forecast, lang) {
+  renderForecast(stateObj, userLocale) {
+    let forecast = stateObj.attributes.forecast;
+    
+    if (this.config.hourly_forecast) {
+      const sensorName = `sensor.${this.entity.replace('.','_')}_hourly`;
+      // console.debug("Trickery with hourly forecast! ", sensorName);
+      forecast = this._hass.states[sensorName].attributes.forecast;
+    }
+
+
     if (!forecast || forecast.length === 0) {
       return html``;
     }
@@ -321,11 +343,8 @@ export class VWeatherCard extends LitElement {
               <div class="day">
                 <div class="dayname">
                   ${this.config.hourly_forecast
-              ? new Date(daily.datetime).toLocaleTimeString(lang, {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-              : new Date(daily.datetime).toLocaleDateString(lang, {
+              ? formatTime(new Date(daily.datetime),userLocale)
+              : new Date(daily.datetime).toLocaleDateString(userLocale.language, {
                 weekday: "short",
               })}
                 </div>
@@ -336,12 +355,14 @@ export class VWeatherCard extends LitElement {
               )}') no-repeat; background-size: contain"
                 ></i>
                 <div class="highTemp">
-                  ${daily.temperature}${this.getUnit("temperature")}
+                  ${daily.temperature}
+                  ${stateObj.attributes.temperature_unit}
                 </div>
                 ${daily.templow !== undefined
               ? html`
                       <div class="lowTemp">
-                        ${daily.templow}${this.getUnit("temperature")}
+                        ${daily.templow}
+                        ${stateObj.attributes.temperature_unit}
                       </div>
                     `
               : ""}
@@ -350,7 +371,8 @@ export class VWeatherCard extends LitElement {
               daily.precipitation !== null
               ? html`
                       <div class="precipitation">
-                        ${Math.round(daily.precipitation * 10) / 10} ${this.getUnit("precipitation")}
+                        ${Math.round(daily.precipitation * 10) / 10} 
+                        ${stateObj.attributes.precipitation_unit}
                       </div>
                     `
               : ""}
@@ -359,7 +381,8 @@ export class VWeatherCard extends LitElement {
               daily.precipitation_probability !== null
               ? html`
                       <div class="precipitation_probability">
-                        ${Math.round(daily.precipitation_probability)} ${this.getUnit("precipitation_probability")}
+                        ${Math.round(daily.precipitation_probability)} 
+                        ${stateObj.attributes.percipitation_unit}
                       </div>
                     `
               : ""}
@@ -374,30 +397,13 @@ export class VWeatherCard extends LitElement {
 
   getWeatherIcon(condition, sun = null) {
     return `${this.config.icons
-        ? this.config.icons
-        : "https://cdn.jsdelivr.net/gh/bramkragten/weather-card/dist/icons/"
+      ? this.config.icons
+      : "https://cdn.jsdelivr.net/gh/bramkragten/weather-card/dist/icons/"
       }${sun && sun.state == "below_horizon"
         ? weatherIconsNight[condition]
         : weatherIconsDay[condition]
       }.svg`;
   }
-
-  getUnit(measure) {
-    const lengthUnit = this._hass.config.unit_system.length;
-    switch (measure) {
-      case "air_pressure":
-        return lengthUnit === "km" ? "hPa" : "inHg";
-      case "length":
-        return lengthUnit;
-      case "precipitation":
-        return lengthUnit === "km" ? "mm" : "in";
-      case "precipitation_probability":
-        return "%";
-      default:
-        return this._hass.config.unit_system[measure] || "";
-    }
-  }
-
 
   // card configuration
   static getConfigElement() {

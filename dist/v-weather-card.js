@@ -2368,8 +2368,9 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
     }
     set hass(hass) {
         this._hass = hass;
-        console.log("Setting hass", hass);
+        console.debug("Setting hass", hass);
         this.state = hass.states[this.config.entity];
+        console.debug("State", this.state);
         this.entity = this.config.entity;
         this.header = this.config.header === "" ? (0, $f58f44579a4747ac$export$45b790e32b2810ee) : this.config.header;
         if (this.state) {
@@ -2381,7 +2382,18 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
         // console.log("Header", this.header);
         // console.log("Name", this.name);
         // console.log("State", this.state);
-        console.log("Status", this.status);
+        console.debug("Status", this.status);
+    //   this._hass.callApi("POST", "services/weather/get_forecast", {
+    //     target: {
+    //       entity_id: this.entity,
+    //     },
+    //     data: {
+    //       type: "hourly"
+    //     },
+    //     response_variable: "weather_forecast"
+    //   }).then(r => {
+    //     console.log("Response: ", r);
+    //   })
     }
     static #_ = // declarative part
     this.styles = (0, $120c5a859c012378$export$9dd6ff9ea0189349);
@@ -2392,9 +2404,8 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
     }
     // https://lit.dev/docs/components/rendering/
     render() {
-        let content;
         if (!this.config || !this._hass) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
-        this.numberElements = 0;
+        if (this.config.hou) this.numberElements = 0;
         const lang = this._hass.selectedLanguage || this._hass.language;
         const stateObj = this._hass.states[this.config.entity];
         if (!stateObj) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -2414,8 +2425,8 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
       <ha-card header="${this.header}" @click="${this._handleClick}">
         ${this.config.current !== false ? this.renderCurrent(stateObj) : ""}
-        ${this.config.details !== false ? this.renderDetails(stateObj, lang) : ""}
-        ${this.config.forecast !== false ? this.renderForecast(stateObj.attributes.forecast, lang) : ""}
+        ${this.config.details !== false ? this.renderDetails(stateObj, this._hass.locale) : ""}
+        ${this.config.forecast !== false ? this.renderForecast(stateObj, this._hass.locale) : ""}
       </ha-card>
       `;
     }
@@ -2450,25 +2461,21 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
         </span>
         ${this.config.name ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)` <span class="title"> ${this.config.name} </span> ` : ""}
         <span class="temp"
-          >${this.getUnit("temperature") == "\xb0F" ? Math.round(stateObj.attributes.temperature) : stateObj.attributes.temperature}</span
+          >${stateObj.attributes.temperature_unit === "\xb0F" ? Math.round(stateObj.attributes.temperature) : stateObj.attributes.temperature}</span
         >
-        <span class="tempc"> ${this.getUnit("temperature")}</span>
+        <span class="tempc">
+          ${stateObj.attributes.temperature_unit}
+        </span>
       </div>
     `;
     }
-    renderDetails(stateObj, lang) {
+    renderDetails(stateObj, userLocale) {
         const sun = this._hass.states["sun.sun"];
         let next_rising;
         let next_setting;
         if (sun) {
-            next_rising = new Date(sun.attributes.next_rising).toLocaleTimeString(lang, {
-                hour: "2-digit",
-                minute: "2-digit"
-            });
-            next_setting = new Date(sun.attributes.next_setting).toLocaleTimeString(lang, {
-                hour: "2-digit",
-                minute: "2-digit"
-            });
+            next_rising = (0, $ee1328194d522913$export$3203edd9e5edd663)(new Date(sun.attributes.next_rising), userLocale);
+            next_setting = (0, $ee1328194d522913$export$3203edd9e5edd663)(new Date(sun.attributes.next_setting), userLocale);
         }
         this.numberElements++;
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -2480,21 +2487,23 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
         <li>
           <ha-icon icon="mdi:weather-windy"></ha-icon> ${$a399cc6bbb0eb26a$var$windDirections[Math.floor((stateObj.attributes.wind_bearing + 11.25) / 22.5)]}
           ${stateObj.attributes.wind_speed}<span class="unit">
-            ${this.getUnit("length")}/h
+            ${stateObj.attributes.wind_speed_unit}
           </span>
         </li>
         <li>
           <ha-icon icon="mdi:gauge"></ha-icon>
           ${stateObj.attributes.pressure}
           <span class="unit">
-            ${this.getUnit("air_pressure")}
+            ${stateObj.attributes.pressure_unit}
           </span>
         </li>
-        <li>
+        ${stateObj.attributes.visibility && (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        <li >
           <ha-icon icon="mdi:weather-fog"></ha-icon> ${stateObj.attributes.visibility}<span class="unit">
-            ${this.getUnit("length")}
+            ${stateObj.attributes.visibility_unit}
           </span>
         </li>
+        `}
         ${next_rising ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
               <li>
                 <ha-icon icon="mdi:weather-sunset-up"></ha-icon>
@@ -2510,7 +2519,13 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
       </ul>
     `;
     }
-    renderForecast(forecast, lang) {
+    renderForecast(stateObj, userLocale) {
+        let forecast = stateObj.attributes.forecast;
+        if (this.config.hourly_forecast) {
+            const sensorName = `sensor.${this.entity.replace(".", "_")}_hourly`;
+            // console.debug("Trickery with hourly forecast! ", sensorName);
+            forecast = this._hass.states[sensorName].attributes.forecast;
+        }
         if (!forecast || forecast.length === 0) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
         this.numberElements++;
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -2518,10 +2533,7 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
         ${forecast.slice(0, this.config.number_of_forecasts ? this.config.number_of_forecasts : 5).map((daily)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
               <div class="day">
                 <div class="dayname">
-                  ${this.config.hourly_forecast ? new Date(daily.datetime).toLocaleTimeString(lang, {
-                hour: "2-digit",
-                minute: "2-digit"
-            }) : new Date(daily.datetime).toLocaleDateString(lang, {
+                  ${this.config.hourly_forecast ? (0, $ee1328194d522913$export$3203edd9e5edd663)(new Date(daily.datetime), userLocale) : new Date(daily.datetime).toLocaleDateString(userLocale.language, {
                 weekday: "short"
             })}
                 </div>
@@ -2530,21 +2542,25 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
                   style="background: none, url('${this.getWeatherIcon(daily.condition.toLowerCase())}') no-repeat; background-size: contain"
                 ></i>
                 <div class="highTemp">
-                  ${daily.temperature}${this.getUnit("temperature")}
+                  ${daily.temperature}
+                  ${stateObj.attributes.temperature_unit}
                 </div>
                 ${daily.templow !== undefined ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
                       <div class="lowTemp">
-                        ${daily.templow}${this.getUnit("temperature")}
+                        ${daily.templow}
+                        ${stateObj.attributes.temperature_unit}
                       </div>
                     ` : ""}
                 ${!this.config.hide_precipitation && daily.precipitation !== undefined && daily.precipitation !== null ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
                       <div class="precipitation">
-                        ${Math.round(daily.precipitation * 10) / 10} ${this.getUnit("precipitation")}
+                        ${Math.round(daily.precipitation * 10) / 10} 
+                        ${stateObj.attributes.precipitation_unit}
                       </div>
                     ` : ""}
                 ${!this.config.hide_precipitation && daily.precipitation_probability !== undefined && daily.precipitation_probability !== null ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
                       <div class="precipitation_probability">
-                        ${Math.round(daily.precipitation_probability)} ${this.getUnit("precipitation_probability")}
+                        ${Math.round(daily.precipitation_probability)} 
+                        ${stateObj.attributes.percipitation_unit}
                       </div>
                     ` : ""}
               </div>
@@ -2554,21 +2570,6 @@ let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $
     }
     getWeatherIcon(condition, sun = null) {
         return `${this.config.icons ? this.config.icons : "https://cdn.jsdelivr.net/gh/bramkragten/weather-card/dist/icons/"}${sun && sun.state == "below_horizon" ? $a399cc6bbb0eb26a$var$weatherIconsNight[condition] : $a399cc6bbb0eb26a$var$weatherIconsDay[condition]}.svg`;
-    }
-    getUnit(measure) {
-        const lengthUnit = this._hass.config.unit_system.length;
-        switch(measure){
-            case "air_pressure":
-                return lengthUnit === "km" ? "hPa" : "inHg";
-            case "length":
-                return lengthUnit;
-            case "precipitation":
-                return lengthUnit === "km" ? "mm" : "in";
-            case "precipitation_probability":
-                return "%";
-            default:
-                return this._hass.config.unit_system[measure] || "";
-        }
     }
     // card configuration
     static getConfigElement() {
