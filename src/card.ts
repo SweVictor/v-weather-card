@@ -1,9 +1,9 @@
-import { html, LitElement, TemplateResult, nothing } from "lit";
+import { html, LitElement, TemplateResult, nothing, PropertyValues } from "lit";
 import { styles } from "./card.styles";
-import { state } from "lit/decorators/state";
+import { customElement, state } from "lit/decorators";
 
 import { HassEntity } from "home-assistant-js-websocket";
-import { ActionConfig, ActionHandlerEvent, HomeAssistant, LovelaceCardConfig, handleAction, hasAction } from "custom-card-helpers";
+import { ActionConfig, ActionHandlerEvent, HomeAssistant, LovelaceCardConfig, handleAction, hasAction, hasConfigOrEntityChanged } from "custom-card-helpers";
 
 interface Config extends LovelaceCardConfig {
   header?: string;
@@ -67,7 +67,8 @@ const windDirections = [
   "N",
 ];
 
-export class ToggleCardTypeScript extends LitElement {
+@customElement('v-weather-card')
+export class VWeatherCard extends LitElement {
   // internal reactive states
   @state() private config!: Config;
   @state() private header: string | typeof nothing;
@@ -77,26 +78,28 @@ export class ToggleCardTypeScript extends LitElement {
   // @state() private _name: string;
   @state() private state: HassEntity;
   @state() private status: string;
-  
+
+  private numberElements = 0;
+
   private _hass: HomeAssistant;
 
   // lifecycle interface
   setConfig(config: Config) {
     // The config object contains the configuration specified by the user in ui-lovelace.yaml
-    
+
     // It will minimally contain:
     // config.type = "custom:my-custom-card"
-    
+
     // setConfig will ALWAYS be called at the start of the lifetime of the card
     // BEFORE the `hass` object is first provided.
     // It MAY be called several times during the lifetime of the card, e.g. if the configuration
     // of the card is changed.
-    
-    if(!config.entity) {
+
+    if (!config.entity) {
       // If no entity was specified, this will display a red error card with the message below
       throw new Error('You need to define an entity');
     }
-    
+
     this.config = config;
   }
 
@@ -128,81 +131,75 @@ export class ToggleCardTypeScript extends LitElement {
   // declarative part
   static styles = styles;
 
+  // https://lit.dev/docs/components/lifecycle/#reactive-update-cycle-performing
+  protected shouldUpdate(changedProps: PropertyValues): boolean {
+    if (!this.config) {
+      return false;
+    }
+
+    return hasConfigOrEntityChanged(this, changedProps, false);
+  }
+
+
 
   // https://lit.dev/docs/components/rendering/
-  render() {
+  render(): TemplateResult {
     let content: TemplateResult;
-    if (!this.state) {
-      content = html` <p class="error">${this.name} is unavailable.</p> `;
-    } else {
-      content = html`
-        <dl class="dl">
-          <dt class="dt">${this.name}</dt>
-          <dd class="dd" @click="${this.doToggle}">
-            <span class="toggle ${this.status}">
-              <span class="button"></span>
-            </span>
-            <span class="value">${this.status}</span>
-          </dd>
-        </dl>
+
+
+    if (!this.config || !this._hass) {
+      return html``;
+    }
+
+    this.numberElements = 0;
+
+    const lang = this._hass.selectedLanguage || this._hass.language;
+    const stateObj = this._hass.states[this.config.entity];
+
+    if (!stateObj) {
+      return html`
+        <style>
+          .not-found {
+            flex: 1;
+            background-color: yellow;
+            padding: 8px;
+          }
+        </style>
+        <ha-card>
+          <div class="not-found">
+            Entity not available: ${this.config.entity}
+          </div>
+        </ha-card>
       `;
-      // <!-- .actionHandler=${(actionHandler({
-      //   hasHold: hasAction(this.config.hold_action),
-      //   hasDoubleClick: hasAction(this.config.double_tap_action),
-      // })} -->
-
-      content = html`
-        <ha-card
-          .header=${this.name}
-          @action=${this._handleAction}
-          tabindex="0"
-          .label=${`V Weather Card: ${this.config.entity || 'No Entity Defined'}`}
-        >${content}</ha-card>
-      `;
-
-  // return html`
-  // <ha-card @click="${this._handleClick}">
-  //   ${this._config.current !== false ? this.renderCurrent(stateObj) : ""}
-  //   ${this._config.details !== false ? this.renderDetails(stateObj, lang) : ""}
-  //   ${this._config.forecast !== false
-  //     ? this.renderForecast(stateObj.attributes.forecast, lang)
-  //     : ""}
-  // </ha-card>
-  // `;
-
-    // if (!this._config || !this._hass) {
-    //   return html``;
-    // }
-
-    // this.numberElements = 0;
-
-    // const lang = this._hass.selectedLanguage || this._hass.language;
-    // const stateObj = this._hass.states[this._config.entity];
-
-    // if (!stateObj) {
-    //   return html`
-    //     <style>
-    //       .not-found {
-    //         flex: 1;
-    //         background-color: yellow;
-    //         padding: 8px;
-    //       }
-    //     </style>
-    //     <ha-card>
-    //       <div class="not-found">
-    //         Entity not available: ${this._config.entity}
-    //       </div>
-    //     </ha-card>
-    //   `;
-    // }      
-
     }
 
     return html`
-      <ha-card header="${this.header}">
-        <div class="card-content">${content}</div>
+      <ha-card header="${this.header}" @click="${this._handleClick}">
+        ${this.config.current !== false ? this.renderCurrent(stateObj) : ""}
+        ${this.config.details !== false ? this.renderDetails(stateObj, lang) : ""}
+        ${this.config.forecast !== false
+        ? this.renderForecast(stateObj.attributes.forecast, lang)
+        : ""}
       </ha-card>
-    `;
+      `;
+
+  }
+
+  fireEvent(node, type, detail, options: any = {}) {
+    options = options || {};
+    detail = detail === null || detail === undefined ? {} : detail;
+    const event = new Event(type, {
+      bubbles: options.bubbles === undefined ? true : options.bubbles,
+      cancelable: Boolean(options.cancelable),
+      composed: options.composed === undefined ? true : options.composed,
+    });
+    (event as any).detail = detail;
+    node.dispatchEvent(event);
+    return event;
+  };
+
+  _handleClick() {
+    this.fireEvent(this, "hass-more-info", { entityId: this.config.entity });
   }
 
   private _handleAction(ev: ActionHandlerEvent): void {
@@ -211,12 +208,196 @@ export class ToggleCardTypeScript extends LitElement {
     }
   }
 
-  // event handling
-  doToggle() {
-    this._hass.callService("input_boolean", "toggle", {
-      entity_id: this.config.entity
-    });
+
+
+  renderCurrent(stateObj) {
+    this.numberElements++;
+
+    return html`
+      <div class="current ${this.numberElements > 1 ? "spacer" : ""}">
+        <span
+          class="icon bigger"
+          style="background: none, url('${this.getWeatherIcon(
+      stateObj.state.toLowerCase(),
+      this._hass.states["sun.sun"]
+    )}') no-repeat; background-size: contain;"
+          >${stateObj.state}
+        </span>
+        ${this.config.name
+        ? html` <span class="title"> ${this.config.name} </span> `
+        : ""}
+        <span class="temp"
+          >${this.getUnit("temperature") == "°F"
+        ? Math.round(stateObj.attributes.temperature)
+        : stateObj.attributes.temperature}</span
+        >
+        <span class="tempc"> ${this.getUnit("temperature")}</span>
+      </div>
+    `;
   }
+
+  renderDetails(stateObj, lang) {
+    const sun = this._hass.states["sun.sun"];
+    let next_rising;
+    let next_setting;
+
+    if (sun) {
+      next_rising = new Date(sun.attributes.next_rising).toLocaleTimeString(lang, {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      next_setting = new Date(sun.attributes.next_setting).toLocaleTimeString(lang, {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    this.numberElements++;
+
+    return html`
+      <ul class="variations ${this.numberElements > 1 ? "spacer" : ""}">
+        <li>
+          <ha-icon icon="mdi:water-percent"></ha-icon>
+          ${stateObj.attributes.humidity}<span class="unit"> % </span>
+        </li>
+        <li>
+          <ha-icon icon="mdi:weather-windy"></ha-icon> ${windDirections[
+      Math.floor(((stateObj.attributes.wind_bearing as number) + 11.25) / 22.5)
+      ]}
+          ${stateObj.attributes.wind_speed}<span class="unit">
+            ${this.getUnit("length")}/h
+          </span>
+        </li>
+        <li>
+          <ha-icon icon="mdi:gauge"></ha-icon>
+          ${stateObj.attributes.pressure}
+          <span class="unit">
+            ${this.getUnit("air_pressure")}
+          </span>
+        </li>
+        <li>
+          <ha-icon icon="mdi:weather-fog"></ha-icon> ${stateObj.attributes
+        .visibility}<span class="unit">
+            ${this.getUnit("length")}
+          </span>
+        </li>
+        ${next_rising
+        ? html`
+              <li>
+                <ha-icon icon="mdi:weather-sunset-up"></ha-icon>
+                ${next_rising}
+              </li>
+            `
+        : ""}
+        ${next_setting
+        ? html`
+              <li>
+                <ha-icon icon="mdi:weather-sunset-down"></ha-icon>
+                ${next_setting}
+              </li>
+            `
+        : ""}
+      </ul>
+    `;
+  }
+
+  renderForecast(forecast, lang) {
+    if (!forecast || forecast.length === 0) {
+      return html``;
+    }
+
+    this.numberElements++;
+    return html`
+      <div class="forecast clear ${this.numberElements > 1 ? "spacer" : ""}">
+        ${forecast
+        .slice(
+          0,
+          this.config.number_of_forecasts
+            ? this.config.number_of_forecasts
+            : 5
+        )
+        .map(
+          (daily) => html`
+              <div class="day">
+                <div class="dayname">
+                  ${this.config.hourly_forecast
+              ? new Date(daily.datetime).toLocaleTimeString(lang, {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+              : new Date(daily.datetime).toLocaleDateString(lang, {
+                weekday: "short",
+              })}
+                </div>
+                <i
+                  class="icon"
+                  style="background: none, url('${this.getWeatherIcon(
+                daily.condition.toLowerCase()
+              )}') no-repeat; background-size: contain"
+                ></i>
+                <div class="highTemp">
+                  ${daily.temperature}${this.getUnit("temperature")}
+                </div>
+                ${daily.templow !== undefined
+              ? html`
+                      <div class="lowTemp">
+                        ${daily.templow}${this.getUnit("temperature")}
+                      </div>
+                    `
+              : ""}
+                ${!this.config.hide_precipitation &&
+              daily.precipitation !== undefined &&
+              daily.precipitation !== null
+              ? html`
+                      <div class="precipitation">
+                        ${Math.round(daily.precipitation * 10) / 10} ${this.getUnit("precipitation")}
+                      </div>
+                    `
+              : ""}
+                ${!this.config.hide_precipitation &&
+              daily.precipitation_probability !== undefined &&
+              daily.precipitation_probability !== null
+              ? html`
+                      <div class="precipitation_probability">
+                        ${Math.round(daily.precipitation_probability)} ${this.getUnit("precipitation_probability")}
+                      </div>
+                    `
+              : ""}
+              </div>
+            `
+        )}
+      </div>
+    `;
+  }
+
+
+
+  getWeatherIcon(condition, sun = null) {
+    return `${this.config.icons
+        ? this.config.icons
+        : "https://cdn.jsdelivr.net/gh/bramkragten/weather-card/dist/icons/"
+      }${sun && sun.state == "below_horizon"
+        ? weatherIconsNight[condition]
+        : weatherIconsDay[condition]
+      }.svg`;
+  }
+
+  getUnit(measure) {
+    const lengthUnit = this._hass.config.unit_system.length;
+    switch (measure) {
+      case "air_pressure":
+        return lengthUnit === "km" ? "hPa" : "inHg";
+      case "length":
+        return lengthUnit;
+      case "precipitation":
+        return lengthUnit === "km" ? "mm" : "in";
+      case "precipitation_probability":
+        return "%";
+      default:
+        return this._hass.config.unit_system[measure] || "";
+    }
+  }
+
 
   // card configuration
   static getConfigElement() {
@@ -225,7 +406,7 @@ export class ToggleCardTypeScript extends LitElement {
 
   static getStubConfig() {
     return {
-      entity: "input_boolean.tcts",
+      entity: "weather.home",
       header: "",
     };
   }

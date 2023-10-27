@@ -1,4 +1,4 @@
-import { ToggleCardTypeScript } from "./card";
+import "./card";
 import { ToggleCardTypeScriptEditor } from "./editor";
 
 declare global {
@@ -7,17 +7,17 @@ declare global {
   }
 }
 
-customElements.define("toggle-card-typescript", ToggleCardTypeScript);
+// customElements.define("v-weather-card", VWeatherCard);
 customElements.define(
-  "toggle-card-typescript-editor",
+  "v-weather-card-editor",
   ToggleCardTypeScriptEditor
 );
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "toggle-card-typescript",
-  name: "toggle card with TypeScript",
-  description: "Turn an entity on and off",
+  type: "v-weather-card",
+  name: "V Weather Card",
+  description: "Animated weather card for Home Assistant",
 });
 
 

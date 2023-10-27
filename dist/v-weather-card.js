@@ -1118,50 +1118,191 @@ const $ab210b2da7b39b9d$export$f5c524615a7708d6 = {
 
 
 const $120c5a859c012378$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
-  .error {
-    color: red;
-  }
-  .dl {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .dt {
-    display: flex;
-    align-content: center;
-    flex-wrap: wrap;
-  }
-  .dd {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, auto) minmax(0, 2fr));
-    margin: 0;
-  }
-  .toggle {
-    padding: 0.6em;
-    border: grey;
-    border-radius: 50%;
-  }
-  .toggle.on {
-    background-color: green;
-  }
-  .toggle.off {
-    background-color: red;
-  }
-  .button {
-    display: block;
-    border: outset 0.2em;
-    border-radius: 50%;
-    border-color: silver;
-    background-color: silver;
-    width: 1.4em;
-    height: 1.4em;
-  }
-  .value {
-    padding-left: 0.5em;
-    display: flex;
-    align-content: center;
-    flex-wrap: wrap;
-  }
-`;
+    ha-card {
+      cursor: pointer;
+      margin: auto;
+      overflow: hidden;
+      padding-top: 1.3em;
+      padding-bottom: 1.3em;
+      padding-left: 1em;
+      padding-right: 1em;
+      position: relative;
+    }
+
+    .spacer {
+      padding-top: 1em;
+    }
+
+    .clear {
+      clear: both;
+    }
+
+    .title {
+      position: absolute;
+      left: 3em;
+      font-weight: 300;
+      font-size: 3em;
+      color: var(--primary-text-color);
+    }
+
+    .temp {
+      font-weight: 300;
+      font-size: 4em;
+      color: var(--primary-text-color);
+      position: absolute;
+      right: 1em;
+    }
+
+    .tempc {
+      font-weight: 300;
+      font-size: 1.5em;
+      vertical-align: super;
+      color: var(--primary-text-color);
+      position: absolute;
+      right: 1em;
+      margin-top: -14px;
+      margin-right: 7px;
+    }
+
+    @media (max-width: 460px) {
+      .title {
+        font-size: 2.2em;
+        left: 4em;
+      }
+      .temp {
+        font-size: 3em;
+      }
+      .tempc {
+        font-size: 1em;
+      }
+    }
+
+    .current {
+      padding: 1.2em 0;
+      margin-bottom: 3.5em;
+    }
+
+    .variations {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      font-weight: 300;
+      color: var(--primary-text-color);
+      list-style: none;
+      padding: 0 1em;
+      margin: 0;
+    }
+
+    .variations ha-icon {
+      height: 22px;
+      margin-right: 5px;
+      color: var(--paper-item-icon-color);
+    }
+
+    .variations li {
+      flex-basis: auto;
+      width: 50%;
+    }
+
+    .variations li:nth-child(2n) {
+      text-align: right;
+    }
+
+    .variations li:nth-child(2n) ha-icon {
+      margin-right: 0;
+      margin-left: 8px;
+      float: right;
+    }
+
+    .unit {
+      font-size: 0.8em;
+    }
+
+    .forecast {
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+    }
+
+    .day {
+      flex: 1;
+      display: block;
+      text-align: center;
+      color: var(--primary-text-color);
+      border-right: 0.1em solid #d9d9d9;
+      line-height: 2;
+      box-sizing: border-box;
+    }
+
+    .dayname {
+      text-transform: uppercase;
+    }
+
+    .forecast .day:first-child {
+      margin-left: 0;
+    }
+
+    .forecast .day:nth-last-child(1) {
+      border-right: none;
+      margin-right: 0;
+    }
+
+    .highTemp {
+      font-weight: bold;
+    }
+
+    .lowTemp {
+      color: var(--secondary-text-color);
+    }
+
+    .precipitation {
+      color: var(--primary-text-color);
+      font-weight: 300;
+    }
+
+    .icon.bigger {
+      width: 10em;
+      height: 10em;
+      margin-top: -4em;
+      position: absolute;
+      left: 0em;
+    }
+
+    .icon {
+      width: 50px;
+      height: 50px;
+      margin-right: 5px;
+      display: inline-block;
+      vertical-align: middle;
+      background-size: contain;
+      background-position: center center;
+      background-repeat: no-repeat;
+      text-indent: -9999px;
+    }
+
+    .weather {
+      font-weight: 300;
+      font-size: 1.5em;
+      color: var(--primary-text-color);
+      text-align: left;
+      position: absolute;
+      top: -0.5em;
+      left: 6em;
+      word-wrap: break-word;
+      width: 30%;
+    }
+  `;
+
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ const $14742f68afc766d6$export$da64fc29f17f9d0e = (t)=>(e, o)=>{
+        void 0 !== o ? o.addInitializer(()=>{
+            customElements.define(t, e);
+        }) : customElements.define(t, e);
+    };
 
 
 
@@ -1210,6 +1351,7 @@ function $9cd908ed2625c047$export$d541bacb2bda4494(t) {
 }
 
 
+
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -1220,6 +1362,128 @@ function $9cd908ed2625c047$export$d541bacb2bda4494(t) {
         state: !0,
         attribute: !1
     });
+}
+
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ function $b4269277b3c48b0c$export$b2b799818fbabcf3(t) {
+    return (n, o)=>{
+        const c = "function" == typeof n ? n : n[o];
+        Object.assign(c, t);
+    };
+}
+
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ const $25e9c5a8f7ecfc69$export$51987bb50e1f6752 = (e, t, c)=>(c.configurable = !0, c.enumerable = !0, Reflect.decorate && "object" != typeof t && Object.defineProperty(e, t, c), c);
+
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ function $02a1f3a787c54a30$export$2fa187e846a241c4(e, r) {
+    return (n, s, i)=>{
+        const o = (t)=>t.renderRoot?.querySelector(e) ?? null;
+        if (r) {
+            const { get: e, set: u } = "object" == typeof s ? n : i ?? (()=>{
+                const t = Symbol();
+                return {
+                    get () {
+                        return this[t];
+                    },
+                    set (e) {
+                        this[t] = e;
+                    }
+                };
+            })();
+            return (0, $25e9c5a8f7ecfc69$export$51987bb50e1f6752)(n, s, {
+                get () {
+                    if (r) {
+                        let t = e.call(this);
+                        return void 0 === t && (t = o(this), u.call(this, t)), t;
+                    }
+                    return o(this);
+                }
+            });
+        }
+        return (0, $25e9c5a8f7ecfc69$export$51987bb50e1f6752)(n, s, {
+            get () {
+                return o(this);
+            }
+        });
+    };
+}
+
+
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ let $ed34c589b230c255$var$e;
+function $ed34c589b230c255$export$dcd0d083aa86c355(r) {
+    return (n, o)=>(0, $25e9c5a8f7ecfc69$export$51987bb50e1f6752)(n, o, {
+            get () {
+                return (this.renderRoot ?? ($ed34c589b230c255$var$e ??= document.createDocumentFragment())).querySelectorAll(r);
+            }
+        });
+}
+
+
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ function $ea50f1870b80cbec$export$163dfc35cc43f240(r) {
+    return (n, e)=>(0, $25e9c5a8f7ecfc69$export$51987bb50e1f6752)(n, e, {
+            async get () {
+                return await this.updateComplete, this.renderRoot?.querySelector(r) ?? null;
+            }
+        });
+}
+
+
+
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ function $563fcf7ce7e6c5aa$export$4682af2d9ee91415(o) {
+    return (e, n)=>{
+        const { slot: r, selector: s } = o ?? {}, c = "slot" + (r ? `[name=${r}]` : ":not([name])");
+        return (0, $25e9c5a8f7ecfc69$export$51987bb50e1f6752)(e, n, {
+            get () {
+                const t = this.renderRoot?.querySelector(c), e = t?.assignedElements(o) ?? [];
+                return void 0 === s ? e : e.filter((t)=>t.matches(s));
+            }
+        });
+    };
+}
+
+
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ function $728f1385dd7bf557$export$1bdbe53f9df1b8(n) {
+    return (o, r)=>{
+        const { slot: e } = n ?? {}, s = "slot" + (e ? `[name=${e}]` : ":not([name])");
+        return (0, $25e9c5a8f7ecfc69$export$51987bb50e1f6752)(o, r, {
+            get () {
+                const t = this.renderRoot?.querySelector(s);
+                return t?.assignedNodes(n) ?? [];
+            }
+        });
+    };
 }
 
 
@@ -2083,7 +2347,7 @@ const $a399cc6bbb0eb26a$var$windDirections = [
     "NNW",
     "N"
 ];
-class $a399cc6bbb0eb26a$export$9eee6fffd22320a0 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
+let $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = class VWeatherCard extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
     // lifecycle interface
     setConfig(config) {
         // The config object contains the configuration specified by the user in ui-lovelace.yaml
@@ -2121,80 +2385,190 @@ class $a399cc6bbb0eb26a$export$9eee6fffd22320a0 extends (0, $ab210b2da7b39b9d$ex
     }
     static #_ = // declarative part
     this.styles = (0, $120c5a859c012378$export$9dd6ff9ea0189349);
+    // https://lit.dev/docs/components/lifecycle/#reactive-update-cycle-performing
+    shouldUpdate(changedProps) {
+        if (!this.config) return false;
+        return (0, $ee1328194d522913$export$695b4dbcc1028091)(this, changedProps, false);
+    }
     // https://lit.dev/docs/components/rendering/
     render() {
         let content;
-        if (!this.state) content = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)` <p class="error">${this.name} is unavailable.</p> `;
-        else {
-            content = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-        <dl class="dl">
-          <dt class="dt">${this.name}</dt>
-          <dd class="dd" @click="${this.doToggle}">
-            <span class="toggle ${this.status}">
-              <span class="button"></span>
-            </span>
-            <span class="value">${this.status}</span>
-          </dd>
-        </dl>
+        if (!this.config || !this._hass) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
+        this.numberElements = 0;
+        const lang = this._hass.selectedLanguage || this._hass.language;
+        const stateObj = this._hass.states[this.config.entity];
+        if (!stateObj) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        <style>
+          .not-found {
+            flex: 1;
+            background-color: yellow;
+            padding: 8px;
+          }
+        </style>
+        <ha-card>
+          <div class="not-found">
+            Entity not available: ${this.config.entity}
+          </div>
+        </ha-card>
       `;
-            // <!-- .actionHandler=${(actionHandler({
-            //   hasHold: hasAction(this.config.hold_action),
-            //   hasDoubleClick: hasAction(this.config.double_tap_action),
-            // })} -->
-            content = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-        <ha-card
-          .header=${this.name}
-          @action=${this._handleAction}
-          tabindex="0"
-          .label=${`V Weather Card: ${this.config.entity || "No Entity Defined"}`}
-        >${content}</ha-card>
-      `;
-        // return html`
-        // <ha-card @click="${this._handleClick}">
-        //   ${this._config.current !== false ? this.renderCurrent(stateObj) : ""}
-        //   ${this._config.details !== false ? this.renderDetails(stateObj, lang) : ""}
-        //   ${this._config.forecast !== false
-        //     ? this.renderForecast(stateObj.attributes.forecast, lang)
-        //     : ""}
-        // </ha-card>
-        // `;
-        // if (!this._config || !this._hass) {
-        //   return html``;
-        // }
-        // this.numberElements = 0;
-        // const lang = this._hass.selectedLanguage || this._hass.language;
-        // const stateObj = this._hass.states[this._config.entity];
-        // if (!stateObj) {
-        //   return html`
-        //     <style>
-        //       .not-found {
-        //         flex: 1;
-        //         background-color: yellow;
-        //         padding: 8px;
-        //       }
-        //     </style>
-        //     <ha-card>
-        //       <div class="not-found">
-        //         Entity not available: ${this._config.entity}
-        //       </div>
-        //     </ha-card>
-        //   `;
-        // }      
-        }
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-      <ha-card header="${this.header}">
-        <div class="card-content">${content}</div>
+      <ha-card header="${this.header}" @click="${this._handleClick}">
+        ${this.config.current !== false ? this.renderCurrent(stateObj) : ""}
+        ${this.config.details !== false ? this.renderDetails(stateObj, lang) : ""}
+        ${this.config.forecast !== false ? this.renderForecast(stateObj.attributes.forecast, lang) : ""}
       </ha-card>
-    `;
+      `;
+    }
+    fireEvent(node, type, detail, options = {}) {
+        options = options || {};
+        detail = detail === null || detail === undefined ? {} : detail;
+        const event = new Event(type, {
+            bubbles: options.bubbles === undefined ? true : options.bubbles,
+            cancelable: Boolean(options.cancelable),
+            composed: options.composed === undefined ? true : options.composed
+        });
+        event.detail = detail;
+        node.dispatchEvent(event);
+        return event;
+    }
+    _handleClick() {
+        this.fireEvent(this, "hass-more-info", {
+            entityId: this.config.entity
+        });
     }
     _handleAction(ev) {
         if (this._hass && this.config && ev.detail.action) (0, $ee1328194d522913$export$6c6c3f4b7541eaf1)(this, this._hass, this.config, ev.detail.action);
     }
-    // event handling
-    doToggle() {
-        this._hass.callService("input_boolean", "toggle", {
-            entity_id: this.config.entity
-        });
+    renderCurrent(stateObj) {
+        this.numberElements++;
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+      <div class="current ${this.numberElements > 1 ? "spacer" : ""}">
+        <span
+          class="icon bigger"
+          style="background: none, url('${this.getWeatherIcon(stateObj.state.toLowerCase(), this._hass.states["sun.sun"])}') no-repeat; background-size: contain;"
+          >${stateObj.state}
+        </span>
+        ${this.config.name ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)` <span class="title"> ${this.config.name} </span> ` : ""}
+        <span class="temp"
+          >${this.getUnit("temperature") == "\xb0F" ? Math.round(stateObj.attributes.temperature) : stateObj.attributes.temperature}</span
+        >
+        <span class="tempc"> ${this.getUnit("temperature")}</span>
+      </div>
+    `;
+    }
+    renderDetails(stateObj, lang) {
+        const sun = this._hass.states["sun.sun"];
+        let next_rising;
+        let next_setting;
+        if (sun) {
+            next_rising = new Date(sun.attributes.next_rising).toLocaleTimeString(lang, {
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+            next_setting = new Date(sun.attributes.next_setting).toLocaleTimeString(lang, {
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+        this.numberElements++;
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+      <ul class="variations ${this.numberElements > 1 ? "spacer" : ""}">
+        <li>
+          <ha-icon icon="mdi:water-percent"></ha-icon>
+          ${stateObj.attributes.humidity}<span class="unit"> % </span>
+        </li>
+        <li>
+          <ha-icon icon="mdi:weather-windy"></ha-icon> ${$a399cc6bbb0eb26a$var$windDirections[Math.floor((stateObj.attributes.wind_bearing + 11.25) / 22.5)]}
+          ${stateObj.attributes.wind_speed}<span class="unit">
+            ${this.getUnit("length")}/h
+          </span>
+        </li>
+        <li>
+          <ha-icon icon="mdi:gauge"></ha-icon>
+          ${stateObj.attributes.pressure}
+          <span class="unit">
+            ${this.getUnit("air_pressure")}
+          </span>
+        </li>
+        <li>
+          <ha-icon icon="mdi:weather-fog"></ha-icon> ${stateObj.attributes.visibility}<span class="unit">
+            ${this.getUnit("length")}
+          </span>
+        </li>
+        ${next_rising ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+              <li>
+                <ha-icon icon="mdi:weather-sunset-up"></ha-icon>
+                ${next_rising}
+              </li>
+            ` : ""}
+        ${next_setting ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+              <li>
+                <ha-icon icon="mdi:weather-sunset-down"></ha-icon>
+                ${next_setting}
+              </li>
+            ` : ""}
+      </ul>
+    `;
+    }
+    renderForecast(forecast, lang) {
+        if (!forecast || forecast.length === 0) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
+        this.numberElements++;
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+      <div class="forecast clear ${this.numberElements > 1 ? "spacer" : ""}">
+        ${forecast.slice(0, this.config.number_of_forecasts ? this.config.number_of_forecasts : 5).map((daily)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+              <div class="day">
+                <div class="dayname">
+                  ${this.config.hourly_forecast ? new Date(daily.datetime).toLocaleTimeString(lang, {
+                hour: "2-digit",
+                minute: "2-digit"
+            }) : new Date(daily.datetime).toLocaleDateString(lang, {
+                weekday: "short"
+            })}
+                </div>
+                <i
+                  class="icon"
+                  style="background: none, url('${this.getWeatherIcon(daily.condition.toLowerCase())}') no-repeat; background-size: contain"
+                ></i>
+                <div class="highTemp">
+                  ${daily.temperature}${this.getUnit("temperature")}
+                </div>
+                ${daily.templow !== undefined ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                      <div class="lowTemp">
+                        ${daily.templow}${this.getUnit("temperature")}
+                      </div>
+                    ` : ""}
+                ${!this.config.hide_precipitation && daily.precipitation !== undefined && daily.precipitation !== null ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                      <div class="precipitation">
+                        ${Math.round(daily.precipitation * 10) / 10} ${this.getUnit("precipitation")}
+                      </div>
+                    ` : ""}
+                ${!this.config.hide_precipitation && daily.precipitation_probability !== undefined && daily.precipitation_probability !== null ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                      <div class="precipitation_probability">
+                        ${Math.round(daily.precipitation_probability)} ${this.getUnit("precipitation_probability")}
+                      </div>
+                    ` : ""}
+              </div>
+            `)}
+      </div>
+    `;
+    }
+    getWeatherIcon(condition, sun = null) {
+        return `${this.config.icons ? this.config.icons : "https://cdn.jsdelivr.net/gh/bramkragten/weather-card/dist/icons/"}${sun && sun.state == "below_horizon" ? $a399cc6bbb0eb26a$var$weatherIconsNight[condition] : $a399cc6bbb0eb26a$var$weatherIconsDay[condition]}.svg`;
+    }
+    getUnit(measure) {
+        const lengthUnit = this._hass.config.unit_system.length;
+        switch(measure){
+            case "air_pressure":
+                return lengthUnit === "km" ? "hPa" : "inHg";
+            case "length":
+                return lengthUnit;
+            case "precipitation":
+                return lengthUnit === "km" ? "mm" : "in";
+            case "precipitation_probability":
+                return "%";
+            default:
+                return this._hass.config.unit_system[measure] || "";
+        }
     }
     // card configuration
     static getConfigElement() {
@@ -2202,29 +2576,38 @@ class $a399cc6bbb0eb26a$export$9eee6fffd22320a0 extends (0, $ab210b2da7b39b9d$ex
     }
     static getStubConfig() {
         return {
-            entity: "input_boolean.tcts",
+            entity: "weather.home",
             header: ""
         };
     }
-}
+    constructor(...args){
+        super(...args);
+        this.numberElements = 0;
+    }
+};
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $a399cc6bbb0eb26a$export$9eee6fffd22320a0.prototype, "config", void 0);
+], $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4.prototype, "config", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $a399cc6bbb0eb26a$export$9eee6fffd22320a0.prototype, "header", void 0);
+], $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4.prototype, "header", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $a399cc6bbb0eb26a$export$9eee6fffd22320a0.prototype, "entity", void 0);
+], $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4.prototype, "entity", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $a399cc6bbb0eb26a$export$9eee6fffd22320a0.prototype, "name", void 0);
+], $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4.prototype, "name", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $a399cc6bbb0eb26a$export$9eee6fffd22320a0.prototype, "state", void 0);
+], $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4.prototype, "state", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $a399cc6bbb0eb26a$export$9eee6fffd22320a0.prototype, "status", void 0);
+], $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4.prototype, "status", void 0);
+$a399cc6bbb0eb26a$export$2564da1f4cc8e8b4 = (0, $24c52f343453d62d$export$29e00dfd3077644b)([
+    (0, $14742f68afc766d6$export$da64fc29f17f9d0e)("v-weather-card")
+], $a399cc6bbb0eb26a$export$2564da1f4cc8e8b4);
+
+
 
 
 
@@ -2285,13 +2668,13 @@ class $d067581fc0d59830$export$428b02af6307b05 extends (0, $ab210b2da7b39b9d$exp
 ], $d067581fc0d59830$export$428b02af6307b05.prototype, "_config", void 0);
 
 
-customElements.define("toggle-card-typescript", (0, $a399cc6bbb0eb26a$export$9eee6fffd22320a0));
-customElements.define("toggle-card-typescript-editor", (0, $d067581fc0d59830$export$428b02af6307b05));
+// customElements.define("v-weather-card", VWeatherCard);
+customElements.define("v-weather-card-editor", (0, $d067581fc0d59830$export$428b02af6307b05));
 window.customCards = window.customCards || [];
 window.customCards.push({
-    type: "toggle-card-typescript",
-    name: "toggle card with TypeScript",
-    description: "Turn an entity on and off"
+    type: "v-weather-card",
+    name: "V Weather Card",
+    description: "Animated weather card for Home Assistant"
 }); // // This puts your card into the UI card picker dialog
  // (window as any).customCards = (window as any).customCards || [];
  // (window as any).customCards.push({
